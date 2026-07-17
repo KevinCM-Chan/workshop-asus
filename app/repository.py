@@ -1,4 +1,11 @@
+from collections.abc import Callable
+
 from app.models import Product
+
+_SORT_KEYS: dict[str, Callable[[Product], object]] = {
+    "name": lambda p: p.name,
+    "price": lambda p: p.price,
+}
 
 PRODUCTS = [
     Product(id=1, name="Zenbook 14 OLED", category="Laptop", price=42900),
@@ -29,7 +36,6 @@ def list_products(
         ]
 
     if sort is not None:
-        _SORT_KEYS = {"name": lambda p: p.name, "price": lambda p: p.price}
         key_fn = _SORT_KEYS.get(sort)
         if key_fn is None:
             raise ValueError(f"Invalid sort field: {sort!r}")
