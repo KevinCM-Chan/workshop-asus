@@ -10,8 +10,37 @@ PRODUCTS = [
 ]
 
 
-def list_products() -> list[Product]:
-    return PRODUCTS.copy()
+def list_products(
+    *,
+    q: str | None = None,
+    sort: str | None = None,
+    order: str = "asc",
+    page: int = 1,
+    page_size: int = 20,
+) -> tuple[list[Product], int]:
+    results = PRODUCTS.copy()
+
+    if q is not None:
+        q_lower = q.lower()
+        results = [
+            p
+            for p in results
+            if q_lower in p.name.lower() or q_lower in p.category.lower()
+        ]
+
+    if sort is not None:
+        _SORT_KEYS = {"name": lambda p: p.name, "price": lambda p: p.price}
+        key_fn = _SORT_KEYS.get(sort)
+        if key_fn is None:
+            raise ValueError(f"Invalid sort field: {sort!r}")
+        reverse = order == "desc"
+        results = sorted(results, key=key_fn, reverse=reverse)
+
+    total = len(results)
+    start = (page - 1) * page_size
+    results = results[start : start + page_size]
+
+    return results, total
 
 
 def get_product(product_id: int) -> Product | None:
